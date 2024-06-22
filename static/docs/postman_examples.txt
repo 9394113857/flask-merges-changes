@@ -1,0 +1,43 @@
+POST
+http://127.0.0.1:5000/register
+Body->Raw->Json:-
+{
+    "username": "testuser",
+    "password": "testpass"
+}
+Send
+
+POST
+http://127.0.0.1:5000/login
+Body->Raw->Json:-
+{
+    "username": "testuser",
+    "password": "testpass"
+}
+{
+    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTcxOTA2MDE0NywianRpIjoiZTNlYzliMjctZDNiZC00NzE2LTg0YTEtMjUxNjY5ZTM2ZDY2IiwidHlwZSI6ImFjY2VzcyIsInN1YiI6MiwibmJmIjoxNzE5MDYwMTQ3LCJjc3JmIjoiYzZlZTg2MmYtY2M1OS00ZTliLTg2NDItMjlhOTdlY2NkMTkwIiwiZXhwIjoxNzE5MDYzNzQ3fQ.vF_-jKfmjKCKL34u-fnxX3C2J9DG8f0shf4NzAoqHwQ"
+}
+# so always same details also different token values will be generated to use further routes okay.
+
+GET
+http://127.0.0.1:5000/protected
+Authorization Tab:-
+Type => Bearer token
+
+Token: <paste-here>
+
+POST
+http://127.0.0.1:5000/logout
+Authorization Tab:-
+Type => Bearer token
+
+Token: <paste-here>
+
+
+so if we check again after logout like this so working:-
+{
+    "msg": "Token has been revoked"
+}
+
+
+
