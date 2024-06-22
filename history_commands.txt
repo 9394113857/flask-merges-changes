@@ -1,0 +1,39 @@
+PS D:\Full-Stack\flask-code> cd ..
+PS D:\Full-Stack> cd .\backend_env\        
+PS D:\Full-Stack\backend_env> cd .\Scripts\
+PS D:\Full-Stack\backend_env\Scripts> .\activate
+(backend_env) PS D:\Full-Stack\backend_env\Scripts> 
+
+(backend_env) PS D:\Full-Stack\backend_env\Scripts> deactivate      
+PS D:\Full-Stack\backend_env\Scripts> 
+
+(backend_env) PS D:\Full-Stack\backend_env\Scripts> cd ..
+(backend_env) PS D:\Full-Stack\backend_env> cd ..
+(backend_env) PS D:\Full-Stack> cd .\flask-code\
+(backend_env) PS D:\Full-Stack\flask-code> dir
+
+(backend_env) PS D:\Full-Stack\flask-code> py .\app.py
+
+
+
+==============================================================
+
+# home paths:-
+
+PS D:\Full-Stack\Flask-Login-Code-main> cd ..
+PS D:\Full-Stack> cd .\flask-code-env\
+PS D:\Full-Stack\flask-code-env> cd .\Scripts\
+PS D:\Full-Stack\flask-code-env\Scripts> .\activate
+(flask-code-env) PS D:\Full-Stack\flask-code-env\Scripts> deactivate      
+PS D:\Full-Stack\flask-code-env\Scripts> 
+PS D:\Full-Stack\flask-code-env\Scripts> .\activate
+(flask-code-env) PS D:\Full-Stack\flask-code-env\Scripts> cd ..
+(flask-code-env) PS D:\Full-Stack\flask-code-env> cd ..
+(flask-code-env) PS D:\Full-Stack> cd .\Flask-Login-Code-main\
+(flask-code-env) PS D:\Full-Stack\Flask-Login-Code-main> dir
+
+
+
+
+
+
