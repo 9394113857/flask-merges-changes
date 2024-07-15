@@ -23,10 +23,10 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(120), nullable=False)
-    name = db.Column(db.String(120), nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
-    phone = db.Column(db.String(20), unique=True, nullable=False)
-    address = db.Column(db.String(255), nullable=False)
+    name = db.Column(db.String(120), nullable=True)
+    email = db.Column(db.String(120), unique=True, nullable=True)
+    phone = db.Column(db.String(20), unique=True, nullable=True)
+    address = db.Column(db.String(255), nullable=True)
 
 class TokenBlocklist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -50,22 +50,25 @@ def register():
     data = request.get_json()
     if User.query.filter_by(username=data['username']).first():
         return jsonify({"message": "Username already taken"}), 400
-    if User.query.filter_by(email=data['email']).first():
+
+    # Optional fields checks
+    if 'email' in data and User.query.filter_by(email=data['email']).first():
         return jsonify({"message": "Email already registered"}), 400
-    if User.query.filter_by(phone=data['phone']).first():
+    if 'phone' in data and User.query.filter_by(phone=data['phone']).first():
         return jsonify({"message": "Phone number already registered"}), 400
 
     new_user = User(
         username=data['username'],
         password=data['password'],
-        name=data['name'],
-        email=data['email'],
-        phone=data['phone'],
-        address=data['address']
+        name=data.get('name'),
+        email=data.get('email'),
+        phone=data.get('phone'),
+        address=data.get('address')
     )
     db.session.add(new_user)
     db.session.commit()
     return jsonify({"message": "User registered successfully"}), 201
+
 
 @app.route('/login', methods=['POST'])
 def login():
