@@ -1,0 +1,193 @@
+// 1. Test Route
+{
+    "method": "GET",
+    "url": "http://localhost:5000/",
+    "headers": [],
+    "body": {},
+    "description": "Test Route"
+}
+
+// Response:
+{
+    "message": "Hello, World!"
+}
+
+// 2. Register User
+{
+    "method": "POST",
+    "url": "http://localhost:5000/register",
+    "headers": [
+        {
+            "key": "Content-Type",
+            "value": "application/json"
+        }
+    ],
+    "body": {
+        "mode": "raw",
+        "raw": JSON.stringify({
+            "username": "johndoe",
+            "password": "password123",
+            "name": "John Doe",
+            "email": "johndoe@example.com",
+            "phone": "1234567890",
+            "address": "123 Main St"
+        })
+    },
+    "description": "Register User"
+}
+
+// Response:
+{
+    "message": "User registered successfully"
+}
+
+// Error Response if username already exists:
+{
+    "message": "Username already taken"
+}
+
+// Error Response if email already registered:
+{
+    "message": "Email already registered"
+}
+
+// 3. Login User
+{
+    "method": "POST",
+    "url": "http://localhost:5000/login",
+    "headers": [
+        {
+            "key": "Content-Type",
+            "value": "application/json"
+        }
+    ],
+    "body": {
+        "mode": "raw",
+        "raw": JSON.stringify({
+            "username": "johndoe",
+            "password": "password123"
+        })
+    },
+    "description": "Login User"
+}
+
+// Response:
+{
+    "access_token": "your_jwt_token_here"
+}
+
+// Error Response if invalid credentials:
+{
+    "message": "Invalid credentials"
+}
+
+// 4. Logout User
+{
+    "method": "POST",
+    "url": "http://localhost:5000/logout",
+    "headers": [
+        {
+            "key": "Authorization",
+            "value": "Bearer your_jwt_token_here"
+        }
+    ],
+    "body": {},
+    "description": "Logout User"
+}
+
+// Response:
+{
+    "message": "Successfully logged out"
+}
+
+// 5. Protected Route
+{
+    "method": "GET",
+    "url": "http://localhost:5000/protected",
+    "headers": [
+        {
+            "key": "Authorization",
+            "value": "Bearer your_jwt_token_here"
+        }
+    ],
+    "body": {},
+    "description": "Protected Route"
+}
+
+// Response:
+{
+    "message": "This is a protected route"
+}
+
+// 6. Get User Information
+{
+    "method": "GET",
+    "url": "http://localhost:5000/user",
+    "headers": [
+        {
+            "key": "Authorization",
+            "value": "Bearer your_jwt_token_here"
+        }
+    ],
+    "body": {},
+    "description": "Get User Information"
+}
+
+// Response:
+{
+    "username": "johndoe",
+    "name": "John Doe",
+    "email": "johndoe@example.com",
+    "phone": "1234567890",
+    "address": "123 Main St"
+}
+
+// 7. Update User Information
+{
+    "method": "PUT",
+    "url": "http://localhost:5000/user",
+    "headers": [
+        {
+            "key": "Authorization",
+            "value": "Bearer your_jwt_token_here"
+        },
+        {
+            "key": "Content-Type",
+            "value": "application/json"
+        }
+    ],
+    "body": {
+        "mode": "raw",
+        "raw": JSON.stringify({
+            "name": "Johnathan Doe",
+            "email": "johnathan.doe@example.com",
+            "phone": "0987654321",
+            "address": "456 Elm St"
+        })
+    },
+    "description": "Update User Information"
+}
+
+// Response:
+{
+    "message": "User information updated successfully"
+}
+
+// 8. Delete User
+{
+    "method": "DELETE",
+    "url": "http://localhost:5000/user",
+    "headers": [
+        {
+            "key": "Authorization",
+            "value": "Bearer your_jwt_token_here"
+        }
+    ],
+    "body": {},
+    "description": "Delete User"
+}
+
+// Response:
+{
+    "message": "User deleted successfully"
+}
