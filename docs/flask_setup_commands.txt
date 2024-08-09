@@ -1,0 +1,14 @@
+# 1. Set the FLASK_APP environment variable to point to your main Flask file (run.py)
+$env:FLASK_APP="run.py"  # Step 1
+
+# 2. Initialize the database (this creates the migrations directory and necessary files)
+flask db init  # Step 2
+
+# 3. Generate the initial migration script based on the current state of your models
+flask db migrate  # Step 3
+
+# 4. Apply the migrations to the database, updating it to the current state
+flask db upgrade  # Step 4
+
+# 5. Run the Flask application (ensure your environment variable is still set)
+flask run  # Step 5
