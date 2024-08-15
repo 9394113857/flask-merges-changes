@@ -1,0 +1,17 @@
+# 1. Set the environment variable for Flask to point to your application file
+$env:FLASK_APP="run.py"
+
+# 2. Initialize the migrations directory, which will contain migration scripts
+flask db init
+
+# 3. Create an initial migration script based on your models. The '-m' option provides a message for this migration
+flask db migrate -m "Initial migration"
+
+# 4. Apply the migrations to your database to create tables and schema as defined in your models
+flask db upgrade
+
+# 5. Run the Flask application. This starts the development server to test your application
+flask run
+
+# 6. To stop the Flask development server, you can use the keyboard shortcut:
+#    - Press Ctrl+C in the terminal where the server is running.

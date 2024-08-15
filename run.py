@@ -8,18 +8,20 @@ from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt, unset_jwt_cookies
 from flask_cors import CORS
 
+# Create Flask app instance
 app = Flask(__name__)
-CORS(app)  # Enable CORS
+# Enable Cross-Origin Resource Sharing (CORS) for the app
+CORS(app)
 
-# Configuration settings
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
-app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+# Configuration settings for the Flask app
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'  # Database URI
+app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # Secret key for JWT
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)  # Token expiration time
 
 # Initialize extensions
-db = SQLAlchemy(app)
-migrate = Migrate(app, db)
-jwt = JWTManager(app)
+db = SQLAlchemy(app)  # SQLAlchemy for database management
+migrate = Migrate(app, db)  # Flask-Migrate for database migrations
+jwt = JWTManager(app)  # JWTManager for handling JWT tokens
 
 # Logger configuration
 logs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
@@ -46,7 +48,7 @@ logger.setLevel(logging.INFO)
 # Add the RotatingFileHandler to the logger
 logger.addHandler(log_handler)
 
-# User model with additional fields
+# Define the User model with additional fields
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
@@ -56,27 +58,30 @@ class User(db.Model):
     phone = db.Column(db.String(20), unique=True, nullable=True)
     address = db.Column(db.String(255), nullable=True)
 
+# Define the TokenBlocklist model for tracking revoked tokens
 class TokenBlocklist(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    jti = db.Column(db.String(36), nullable=False)
-    created_at = db.Column(db.DateTime, nullable=False)
+    jti = db.Column(db.String(36), nullable=False)  # JWT ID
+    created_at = db.Column(db.DateTime, nullable=False)  # Token creation time
 
+# Check if the token is revoked by looking it up in the blocklist
 @jwt.token_in_blocklist_loader
 def check_if_token_revoked(jwt_header, jwt_payload):
     jti = jwt_payload['jti']
     token = TokenBlocklist.query.filter_by(jti=jti).first()
     return token is not None
 
-# Route definitions with CRUD operations
-
+# Route for testing
 @app.route('/', methods=['GET'])
 def test():
     logger.info('Test route accessed')
     return jsonify({"message": "Hello, World!"})
 
+# Route for user registration
 @app.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
+    # Check for existing username
     if User.query.filter_by(username=data['username']).first():
         logger.warning('Registration attempt with existing username: %s', data['username'])
         return jsonify({"message": "Username already taken"}), 400
@@ -89,6 +94,7 @@ def register():
         logger.warning('Registration attempt with existing phone: %s', data['phone'])
         return jsonify({"message": "Phone number already registered"}), 400
 
+    # Create a new user
     new_user = User(
         username=data['username'],
         password=data['password'],
@@ -102,6 +108,7 @@ def register():
     logger.info('New user registered: %s', data['username'])
     return jsonify({"message": "User registered successfully"}), 201
 
+# Route for user login
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -110,27 +117,31 @@ def login():
         logger.error('Invalid login attempt for username: %s', data['username'])
         return jsonify({"message": "Invalid credentials"}), 401
     
+    # Create an access token
     access_token = create_access_token(identity=user.id)
     logger.info('User logged in: %s', data['username'])
     return jsonify(access_token=access_token)
 
+# Route for user logout
 @app.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
-    jti = get_jwt()['jti']
-    db.session.add(TokenBlocklist(jti=jti, created_at=datetime.utcnow()))
+    jti = get_jwt()['jti']  # Get the JWT ID
+    db.session.add(TokenBlocklist(jti=jti, created_at=datetime.utcnow()))  # Add to blocklist
     db.session.commit()
     response = jsonify({"message": "Successfully logged out"})
-    unset_jwt_cookies(response)
+    unset_jwt_cookies(response)  # Unset JWT cookies
     logger.info('User logged out with JTI: %s', jti)
     return response
 
+# Route for protected content
 @app.route('/protected', methods=['GET'])
 @jwt_required()
 def protected():
     logger.info('Accessed protected route')
     return jsonify({"message": "This is a protected route"})
 
+# Route to update user information
 @app.route('/update/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def update_user(user_id):
@@ -151,9 +162,7 @@ def update_user(user_id):
     logger.info('User updated successfully: %d', user_id)
     return jsonify({"message": "User updated successfully"}), 200
 
-############## Working User deleting route #################
-# uncomment this route to delete user 
-
+# Uncomment the following route to enable user account deletion
 # @app.route('/user', methods=['DELETE'])
 # @jwt_required()
 # def delete_user():
@@ -164,9 +173,7 @@ def update_user(user_id):
 #     logger.info('User deleted successfully: %d', user_id)
 #     return jsonify({"message": "User deleted successfully"})
 
-############## Working User deleting route #################
-
-# Delete user specific information not sure:-
+# Route to delete specific user information
 # @app.route('/delete/<int:user_id>', methods=['DELETE'])
 # @jwt_required()
 # def delete_user(user_id):
@@ -186,6 +193,7 @@ def update_user(user_id):
 #     logger.info('User information deleted successfully: %d', user_id)
 #     return jsonify({"message": "User information deleted successfully"}), 200
 
+# Route to get user information
 @app.route('/user/<int:user_id>', methods=['GET'])
 @jwt_required()
 def get_user(user_id):
@@ -205,5 +213,6 @@ def get_user(user_id):
     logger.info('User data retrieved successfully: %d', user_id)
     return jsonify(user_data), 200
 
+# Run the Flask app
 if __name__ == '__main__':
     app.run(debug=True)
