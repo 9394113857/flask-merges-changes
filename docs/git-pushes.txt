@@ -1,0 +1,14 @@
+$datetime = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+$commitMessage = @"
+Created 'experiments' branch to test Flask functionality
+
+1. Set up a dedicated branch for testing Flask features
+2. All new Flask-related features and changes will be tested thoroughly here
+3. Once testing is complete and everything works as expected, this branch will be merged into the main branches
+4. Documented the testing process and key areas to focus on during the experiments
+
+Committed on: $datetime
+"@
+
+git add experiments_notes.txt
+git commit -m "$commitMessage"
