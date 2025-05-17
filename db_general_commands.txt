@@ -1,0 +1,32 @@
+# Step 1: Set the FLASK_APP environment variable to point to your Flask app file (run.py)
+$env:FLASK_APP = "run.py"
+
+# Step 2: Initialize the migrations directory
+# This creates a 'migrations' directory where Alembic will store migration scripts.
+# Only run this once at the start of your project setup.
+flask db init
+
+# Step 3: Generate an initial migration script
+# Compares the current database schema with your SQLAlchemy models and creates a migration script.
+# This should be run after you define or update your models.
+flask db migrate
+
+# Step 4: Apply the migration to the database
+# Updates the database schema based on the generated migration script.
+flask db upgrade
+
+# Optional commands to manage migrations during development:
+
+# Step 5: Check the current migration status
+flask db current
+
+# Step 6: Rollback the last migration if needed (downgrade)
+# Use this if you need to revert the last migration applied.
+flask db downgrade
+
+# Step 7: Show history of migrations
+flask db history
+
+# Step 8: Stamp the database with a specific migration identifier
+# This can be used to mark the current state without running the migration commands.
+flask db stamp head
