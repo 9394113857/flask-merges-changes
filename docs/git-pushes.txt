@@ -12,3 +12,5 @@ Committed on: $datetime
 
 git add experiments_notes.txt
 git commit -m "$commitMessage"
+
+

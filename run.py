@@ -191,7 +191,7 @@ def get_user(user_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
+        
 # The following commands are for initializing and migrating your database using Flask-Migrate:
 # flask db init           # Initializes a new migration repository (run once per project)
 # flask db migrate -m "Initial migration"   # Generates a new migration script (run after model changes)

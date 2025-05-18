@@ -1,0 +1,8 @@
+✅ Check if test.db exists:
+ls | grep test.db
+If it returns True, then test.db exists.
+
+✅ Check if migrations folder exists:
+Test-Path .\migrations
+If it returns True, then the migrations folder is present.
+

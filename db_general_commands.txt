@@ -15,18 +15,22 @@ flask db migrate
 # Updates the database schema based on the generated migration script.
 flask db upgrade
 
+# Step 5: Run the Flask development server
+# This will start your app and make it accessible at http://127.0.0.1:5000/
+flask run
+
 # Optional commands to manage migrations during development:
 
-# Step 5: Check the current migration status
+# Step 6: Check the current migration status
 flask db current
 
-# Step 6: Rollback the last migration if needed (downgrade)
+# Step 7: Rollback the last migration if needed (downgrade)
 # Use this if you need to revert the last migration applied.
 flask db downgrade
 
-# Step 7: Show history of migrations
+# Step 8: Show history of migrations
 flask db history
 
-# Step 8: Stamp the database with a specific migration identifier
+# Step 9: Stamp the database with a specific migration identifier
 # This can be used to mark the current state without running the migration commands.
 flask db stamp head
