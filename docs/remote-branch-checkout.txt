@@ -1,0 +1,8 @@
+# How to Check Out a Remote Branch Properly
+
+To check out the remote branch properly, run:
+git checkout --track origin/changes
+
+This will:
+- Create a new local branch named changes
+- Set it up to track the remote branch origin/changes
