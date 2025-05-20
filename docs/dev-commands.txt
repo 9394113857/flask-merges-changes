@@ -1,0 +1,2 @@
+# Start Flask server, wait 3 seconds, then open in Chrome
+Start-Process powershell -ArgumentList 'flask run' ; Start-Sleep -Seconds 3 ; Start-Process "chrome.exe" "http://localhost:5000"
