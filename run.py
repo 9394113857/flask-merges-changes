@@ -62,21 +62,25 @@ def test():
 
 @app.route('/register', methods=['POST'])
 def register():
-    data = request.get_json()
-    if User.query.filter_by(username=data['username']).first():
+    # Here is where Flask receives the JSON from Angular/Postman.
+    # Data is now a Python dictionary.
+    data = request.get_json() # <- Click here and press F9 to set a breakpoint
+    if User.query.filter_by(username=data['username']).first(): # 🔍 This line checks: Does a user with this username already exist?
         logger.warning('Username already exists: %s', data['username'])
         return jsonify({"message": "Username already taken"}), 400
 
-    if 'email' in data and User.query.filter_by(email=data['email']).first():
+    if 'email' in data and User.query.filter_by(email=data['email']).first(): # Checks if email is present and already used.
         logger.warning('Email already exists: %s', data['email'])
         return jsonify({"message": "Email already registered"}), 400
-    if 'phone' in data and User.query.filter_by(phone=data['phone']).first():
+    if 'phone' in data and User.query.filter_by(phone=data['phone']).first(): # Checks if phone number is already used.
         logger.warning('Phone already exists: %s', data['phone'])
         return jsonify({"message": "Phone number already registered"}), 400
 
-    hashed_password = generate_password_hash(data['password'])
+    hashed_password = generate_password_hash(data['password']) # 🛡️ Converts password like 'secret' → hashed string.
+    # ✔️ Hover over hashed_password to view the hash.
 
-    new_user = User(
+    
+    new_user = User(  # 📌 Breakpoint here shows values inside new_user (use __dict__ to inspect all fields in Debug pane).
         username=data['username'],
         password=hashed_password,
         name=data.get('name'),
@@ -84,9 +88,16 @@ def register():
         phone=data.get('phone'),
         address=data.get('address')
     )
+
+    # 🏗️ Creates a new user object.
+
+
     db.session.add(new_user)
     db.session.commit()
-    logger.info('User registered: %s', data['username'])
+    # 🏗️ Adds the new user to the database session and commits it.
+    # 💾 Adds the new user to the database and saves the record.
+
+    logger.info('User registered: %s', data['username'])    
     return jsonify({"message": "User registered successfully"}), 201
 
 @app.route('/login', methods=['POST'])
@@ -106,7 +117,8 @@ def login():
 def logout():
     jti = get_jwt()['jti']
     db.session.add(TokenBlocklist(jti=jti, created_at=datetime.utcnow()))
-    db.session.commit()
+    db.session.commit() # Store the JTI in the blocklist
+    # This will prevent the token from being used again
     response = jsonify({"message": "Successfully logged out"})
     unset_jwt_cookies(response)
     logger.info('User logged out with JTI: %s', jti)
