@@ -1,0 +1,11 @@
+# Step 1: Create and switch to a new branch
+git checkout -b feature/my-empty-commit
+# (Replace "feature/my-empty-commit" with your desired branch name)
+
+# Step 2: Create an empty commit with a message
+git commit --allow-empty -m "Initial empty commit for branch setup"
+# (You can change the message as needed)
+
+# Step 3: Push the new branch to GitHub and set upstream
+git push --set-upstream origin feature/my-empty-commit
+# (This pushes the branch and links it to the remote branch on GitHub)

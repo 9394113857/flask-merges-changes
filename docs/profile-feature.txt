@@ -1,0 +1,14 @@
+profile-feature
+
+# This file documents the 'profile-feature' branch in the Python Flask backend project.
+
+- This branch is dedicated to implementing and maintaining features related to user profiles.
+- All changes and enhancements for user profile functionality should be made here.
+- Typical features may include:
+    - Viewing and editing user profile information
+    - Profile picture upload and management
+    - User settings and preferences
+    - Profile privacy controls
+- Please ensure all code is tested and reviewed before merging into main.
+- Use clear commit messages referencing relevant issues or tasks.
+
