@@ -221,3 +221,8 @@ if __name__ == '__main__':
 # To run the Flask application, use:
 # python run.py           # Starts the Flask development server
 
+###  ============= ###
+
+# $env:FLASK_APP = "run.py"   # (Windows PowerShell) Sets the FLASK_APP environment variable to run.py so Flask knows which app to run
+
+# flask run                   # Starts the Flask development server using the app specified in FLASK_APP
