@@ -65,16 +65,25 @@ def register():
     # Here is where Flask receives the JSON from Angular/Postman.
     # Data is now a Python dictionary.
     data = request.get_json() # <- Click here and press F9 to set a breakpoint
+    # 🛠️ Use the Debugger to inspect the data variable .
+    # 💡 Hover over data to see its contents.   
     if User.query.filter_by(username=data['username']).first(): # 🔍 This line checks: Does a user with this username already exist?
+        # If yes, it returns an error message.
+        # If no, it continues to the next step.
         logger.warning('Username already exists: %s', data['username'])
-        return jsonify({"message": "Username already taken"}), 400
-
+        # This line logs a warning message if the username already exists.
+        return jsonify({"status": "error", "message": "Username already taken"}), 400
+    
+    # Checks if the username is already taken.
     if 'email' in data and User.query.filter_by(email=data['email']).first(): # Checks if email is present and already used.
         logger.warning('Email already exists: %s', data['email'])
-        return jsonify({"message": "Email already registered"}), 400
+        # This line logs a warning message if the email already exists.
+        return jsonify({"status": "error", "message": "Email already registered"}), 400
+    # Checks if the email is already taken.
     if 'phone' in data and User.query.filter_by(phone=data['phone']).first(): # Checks if phone number is already used.
         logger.warning('Phone already exists: %s', data['phone'])
-        return jsonify({"message": "Phone number already registered"}), 400
+        return jsonify({"status": "error", "message": "Phone number already registered"}), 400
+    # Checks if the phone number is already taken.
 
     hashed_password = generate_password_hash(data['password']) # 🛡️ Converts password like 'secret' → hashed string.
     # ✔️ Hover over hashed_password to view the hash.
