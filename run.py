@@ -9,10 +9,11 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 
+# App Initialization
 app = Flask(__name__)
 CORS(app)
 
-# Configuration
+# Configurations
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
@@ -21,14 +22,13 @@ db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 jwt = JWTManager(app)
 
-# Logging
+# Logging Setup
 logs_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'logs')
 year_month_dir = os.path.join(logs_dir, date.today().strftime('%Y'), date.today().strftime('%m'))
 os.makedirs(year_month_dir, exist_ok=True)
 log_file = os.path.join(year_month_dir, f'{date.today()}.log')
 log_handler = RotatingFileHandler(log_file, maxBytes=1024 * 1024, backupCount=5)
 log_handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s [%(module)s:%(lineno)d] %(message)s'))
-
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger.addHandler(log_handler)
@@ -55,41 +55,31 @@ def check_if_token_revoked(jwt_header, jwt_payload):
     return token is not None
 
 # Routes
+
 @app.route('/', methods=['GET'])
 def test():
     logger.info('Test route accessed')
-    return jsonify({"message": "Hello, World!"})
+    return jsonify({"status": "success", "message": "Hello, World!"})
 
+# Registration
 @app.route('/register', methods=['POST'])
 def register():
-    # Here is where Flask receives the JSON from Angular/Postman.
-    # Data is now a Python dictionary.
-    data = request.get_json() # <- Click here and press F9 to set a breakpoint
-    # 🛠️ Use the Debugger to inspect the data variable .
-    # 💡 Hover over data to see its contents.   
-    if User.query.filter_by(username=data['username']).first(): # 🔍 This line checks: Does a user with this username already exist?
-        # If yes, it returns an error message.
-        # If no, it continues to the next step.
+    data = request.get_json()
+    if User.query.filter_by(username=data['username']).first():
         logger.warning('Username already exists: %s', data['username'])
-        # This line logs a warning message if the username already exists.
         return jsonify({"status": "error", "message": "Username already taken"}), 400
-    
-    # Checks if the username is already taken.
-    if 'email' in data and User.query.filter_by(email=data['email']).first(): # Checks if email is present and already used.
+
+    if 'email' in data and User.query.filter_by(email=data['email']).first():
         logger.warning('Email already exists: %s', data['email'])
-        # This line logs a warning message if the email already exists.
         return jsonify({"status": "error", "message": "Email already registered"}), 400
-    # Checks if the email is already taken.
-    if 'phone' in data and User.query.filter_by(phone=data['phone']).first(): # Checks if phone number is already used.
+
+    if 'phone' in data and User.query.filter_by(phone=data['phone']).first():
         logger.warning('Phone already exists: %s', data['phone'])
         return jsonify({"status": "error", "message": "Phone number already registered"}), 400
-    # Checks if the phone number is already taken.
 
-    hashed_password = generate_password_hash(data['password']) # 🛡️ Converts password like 'secret' → hashed string.
-    # ✔️ Hover over hashed_password to view the hash.
+    hashed_password = generate_password_hash(data['password'])
 
-    
-    new_user = User(  # 📌 Breakpoint here shows values inside new_user (use __dict__ to inspect all fields in Debug pane).
+    new_user = User(
         username=data['username'],
         password=hashed_password,
         name=data.get('name'),
@@ -98,54 +88,64 @@ def register():
         address=data.get('address')
     )
 
-    # 🏗️ Creates a new user object.
-
-
     db.session.add(new_user)
     db.session.commit()
-    # 🏗️ Adds the new user to the database session and commits it.
-    # 💾 Adds the new user to the database and saves the record.
+    logger.info('User registered: %s', data['username'])
+    return jsonify({"status": "success", "message": "User registered successfully"}), 201
 
-    logger.info('User registered: %s', data['username'])    
-    return jsonify({"message": "User registered successfully"}), 201
-
+# Login
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     user = User.query.filter_by(username=data['username']).first()
     if not user or not check_password_hash(user.password, data['password']):
         logger.error('Invalid login attempt: %s', data['username'])
-        return jsonify({"message": "Invalid credentials"}), 401
+        return jsonify({"status": "error", "message": "Invalid credentials"}), 401
 
     access_token = create_access_token(identity=user.id)
     logger.info('User logged in: %s', user.username)
-    return jsonify(access_token=access_token)
+    return jsonify({"status": "success", "access_token": access_token}), 200
 
+# Logout
 @app.route('/logout', methods=['POST'])
 @jwt_required()
 def logout():
     jti = get_jwt()['jti']
     db.session.add(TokenBlocklist(jti=jti, created_at=datetime.utcnow()))
-    db.session.commit() # Store the JTI in the blocklist
-    # This will prevent the token from being used again
-    response = jsonify({"message": "Successfully logged out"})
+    db.session.commit()
+    response = jsonify({"status": "success", "message": "Successfully logged out"})
     unset_jwt_cookies(response)
     logger.info('User logged out with JTI: %s', jti)
     return response
 
-@app.route('/protected', methods=['GET'])
+# Get User Details
+@app.route('/user/<int:user_id>', methods=['GET'])
 @jwt_required()
-def protected():
-    logger.info('Protected route accessed')
-    return jsonify({"message": "This is a protected route"})
+def get_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        logger.error('User not found: %d', user_id)
+        return jsonify({"status": "error", "message": "User not found"}), 404
 
+    user_data = {
+        'id': user.id,
+        'username': user.username,
+        'name': user.name,
+        'email': user.email,
+        'phone': user.phone,
+        'address': user.address
+    }
+    logger.info('User retrieved: %d', user_id)
+    return jsonify({"status": "success", "user": user_data}), 200
+
+# Update User
 @app.route('/update/<int:user_id>', methods=['PUT'])
 @jwt_required()
 def update_user(user_id):
     user = User.query.get(user_id)
     if not user:
         logger.error('User not found: %d', user_id)
-        return jsonify({"message": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
 
     data = request.get_json()
     user.username = data.get('username', user.username)
@@ -157,10 +157,12 @@ def update_user(user_id):
     user.email = data.get('email', user.email)
     user.phone = data.get('phone', user.phone)
     user.address = data.get('address', user.address)
+
     db.session.commit()
     logger.info('User updated: %d', user_id)
-    return jsonify({"message": "User updated successfully"}), 200
+    return jsonify({"status": "success", "message": "User updated successfully"}), 200
 
+# Delete Entire User
 @app.route('/user', methods=['DELETE'])
 @jwt_required()
 def delete_user():
@@ -168,61 +170,40 @@ def delete_user():
     user = User.query.get(user_id)
     if not user:
         logger.error('User not found for deletion: %d', user_id)
-        return jsonify({"message": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
+
     db.session.delete(user)
     db.session.commit()
     logger.info('User deleted: %d', user_id)
-    return jsonify({"message": "User deleted successfully"})
+    return jsonify({"status": "success", "message": "User deleted successfully"}), 200
 
+# Selective Delete Fields
 @app.route('/delete/<int:user_id>', methods=['DELETE'])
 @jwt_required()
 def delete_user_fields(user_id):
     user = User.query.get(user_id)
     if not user:
         logger.error('User not found for selective delete: %d', user_id)
-        return jsonify({"message": "User not found"}), 404
+        return jsonify({"status": "error", "message": "User not found"}), 404
 
     data = request.get_json()
     fields_to_delete = data.get('fields', [])
     for field in fields_to_delete:
         if hasattr(user, field):
             setattr(user, field, None)
+
     db.session.commit()
     logger.info('User fields deleted for: %d', user_id)
-    return jsonify({"message": "User information deleted successfully"}), 200
+    return jsonify({"status": "success", "message": "User information deleted successfully"}), 200
 
-@app.route('/user/<int:user_id>', methods=['GET'])
+# Protected Route Example
+@app.route('/protected', methods=['GET'])
 @jwt_required()
-def get_user(user_id):
-    user = User.query.get(user_id)
-    if not user:
-        logger.error('User not found: %d', user_id)
-        return jsonify({"message": "User not found"}), 404
+def protected():
+    logger.info('Protected route accessed')
+    return jsonify({"status": "success", "message": "This is a protected route"}), 200
 
-    user_data = {
-        'id': user.id,
-        'username': user.username,
-        'name': user.name,
-        'email': user.email,
-        'phone': user.phone,
-        'address': user.address
-    }
-    logger.info('User retrieved: %d', user_id)
-    return jsonify(user_data), 200
-
+# Main
 if __name__ == '__main__':
     app.run(debug=True)
-        
-# The following commands are for initializing and migrating your database using Flask-Migrate:
-# flask db init           # Initializes a new migration repository (run once per project)
-# flask db migrate -m "Initial migration"   # Generates a new migration script (run after model changes)
-# flask db upgrade        # Applies the migration to the database (updates the schema)
 
-# To run the Flask application, use:
-# python run.py           # Starts the Flask development server
-
-###  ============= ###
-
-# $env:FLASK_APP = "run.py"   # (Windows PowerShell) Sets the FLASK_APP environment variable to run.py so Flask knows which app to run
-
-# flask run                   # Starts the Flask development server using the app specified in FLASK_APP
