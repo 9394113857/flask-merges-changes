@@ -1,0 +1,4 @@
+# --- Start: Show commits on remote branch not in local HEAD ---
+git log HEAD..origin/profile-feature --oneline
+# --- End: Show commits on remote branch not in local HEAD ---
+
